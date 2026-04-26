@@ -24,8 +24,6 @@ const TEMPLATES = [
   { name: '健康饮食', icon: '🥗', color: '#34C759' }
 ];
 
-const CLIPBOARD_PREFIX = 'DAILY_CHECKIN:';
-
 let currentEditItem = null;
 let selectedIcon = '📌';
 let selectedColor = '#4A90D9';
@@ -47,159 +45,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   initUI();
   renderCheckinView();
 
-  // 优先尝试剪贴板同步
-  const clipboardSuccess = await autoSyncClipboard();
-  if (clipboardSuccess) {
-    // 已通过剪贴板处理，不需要再处理 URL
-  } else {
-    // 剪贴板没有数据，检查 URL 参数作为备用方案
-    const params = new URLSearchParams(window.location.search);
-    const action = params.get('action');
-    const itemName = params.get('item');
-    if (action === 'checkin' && itemName) {
-      if (!isStandalone()) {
-        // Safari 打开，复制到剪贴板并显示确认
-        await handleSafariCheckin(itemName);
-      } else {
-        // 万一在 PWA 打开了带参数的 URL，直接处理
-        await performCheckin(itemName);
-        renderCheckinView();
-      }
-    }
-  }
-
   registerSW();
   updateStorageInfo();
 });
-
-async function performCheckin(itemName) {
-  try {
-    let item = await getItemByName(itemName);
-
-    if (!item) {
-      const template = TEMPLATES.find(t => t.name === itemName);
-      const id = await addItem({
-        name: itemName,
-        icon: template ? template.icon : '📌',
-        color: template ? template.color : '#4A90D9'
-      });
-      item = await getItemById(id);
-    }
-
-    if (item) {
-      const todayRecords = await getTodayRecords();
-      const alreadyChecked = todayRecords.some(r => r.itemId === item.id);
-
-      if (alreadyChecked) {
-        showSiriConfirm(`${item.icon} ${item.name} 今天已经打卡过了`);
-      } else {
-        await checkin(item.id);
-        showSiriConfirm(`${item.icon} ${item.name} 打卡成功！`);
-      }
-    }
-
-    const cleanUrl = window.location.origin + window.location.pathname;
-    window.history.replaceState({}, '', cleanUrl);
-  } catch (e) {
-    console.error('Checkin error:', e);
-    showSiriConfirm('打卡失败，请重试');
-  }
-}
-
-async function handleSafariCheckin(itemName) {
-  try {
-    const syncData = CLIPBOARD_PREFIX + encodeURIComponent(itemName);
-
-    try {
-      await navigator.clipboard.writeText(syncData);
-    } catch (e) {
-      const textarea = document.createElement('textarea');
-      textarea.value = syncData;
-      textarea.style.position = 'fixed';
-      textarea.style.left = '-9999px';
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-    }
-
-    const template = TEMPLATES.find(t => t.name === itemName);
-    const icon = template ? template.icon : '📌';
-
-    document.getElementById('app').style.display = 'none';
-    const container = document.createElement('div');
-    container.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#F2F2F7;padding:32px;text-align:center;font-family:-apple-system,sans-serif;';
-    container.innerHTML = `
-      <div style="max-width:320px;">
-        <div style="font-size:64px;margin-bottom:16px;">${icon}</div>
-        <h2 style="font-size:22px;font-weight:600;color:#1C1C1E;margin-bottom:8px;">${escapeHtml(itemName)} 已记录！</h2>
-        <p style="font-size:15px;color:#8E8E93;line-height:1.6;margin-bottom:24px;">
-          打卡数据已暂存剪贴板<br>
-          下次打开打卡应用时自动同步
-        </p>
-        <button onclick="window.close()" style="background:#4A90D9;color:#fff;border:none;padding:12px 32px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;">
-          关闭
-        </button>
-      </div>
-    `;
-    document.body.appendChild(container);
-
-    setTimeout(() => {
-      try { window.close(); } catch(e) {}
-    }, 5000);
-
-  } catch (e) {
-    console.error('Safari checkin error:', e);
-  }
-}
-
-async function autoSyncClipboard() {
-  try {
-    const text = await navigator.clipboard.readText();
-    if (!text || !text.startsWith(CLIPBOARD_PREFIX)) return false;
-
-    const itemName = decodeURIComponent(text.slice(CLIPBOARD_PREFIX.length));
-    if (!itemName) return false;
-
-    let item = await getItemByName(itemName);
-    if (!item) {
-      const template = TEMPLATES.find(t => t.name === itemName);
-      const id = await addItem({
-        name: itemName,
-        icon: template ? template.icon : '📌',
-        color: template ? template.color : '#4A90D9'
-      });
-      item = await getItemById(id);
-    }
-
-    if (item) {
-      const todayRecords = await getTodayRecords();
-      const alreadyChecked = todayRecords.some(r => r.itemId === item.id);
-
-      if (alreadyChecked) {
-        if (isStandalone()) {
-          showToast(`${item.icon} ${item.name} 今天已经打卡过了`);
-        } else {
-          showSiriConfirm(`${item.icon} ${item.name} 今天已经打卡过了`);
-        }
-      } else {
-        await checkin(item.id);
-        if (isStandalone()) {
-          showToast(`${item.icon} ${item.name} 同步成功！`);
-        } else {
-          showSiriConfirm(`${item.icon} ${item.name} 打卡成功！`);
-        }
-      }
-    }
-
-    try { await navigator.clipboard.writeText(''); } catch(e) {}
-    renderCheckinView();
-    return true;
-  } catch (e) {
-    console.log('剪贴板读取失败或无数据:', e);
-    return false;
-  }
-}
 
 function initUI() {
   document.querySelectorAll('.tab-item').forEach(tab => {
@@ -223,13 +71,6 @@ function initUI() {
   });
   document.getElementById('import-file').addEventListener('change', importCSV);
   document.getElementById('btn-clear').addEventListener('click', confirmClearData);
-  document.getElementById('btn-clipboard-sync-settings').addEventListener('click', autoSyncClipboard);
-
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      autoSyncClipboard();
-    }
-  });
 
   initIconPicker();
   initColorPicker();
@@ -319,8 +160,15 @@ async function renderCheckinView() {
     const itemId = parseInt(card.dataset.id);
     let touchStartY = 0;
     let touchStartX = 0;
+    let preventClick = false;
 
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+      if (preventClick) {
+        e.preventDefault();
+        e.stopPropagation();
+        preventClick = false;
+        return;
+      }
       if (longPressTriggered) {
         longPressTriggered = false;
         return;
@@ -330,11 +178,13 @@ async function renderCheckinView() {
 
     card.addEventListener('touchstart', (e) => {
       longPressTriggered = false;
+      preventClick = false;
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       longPressTimer = setTimeout(() => {
         longPressTriggered = true;
+        preventClick = true;
         if (navigator.vibrate) navigator.vibrate(30);
         openQuickMenu(itemId);
       }, 500);
@@ -342,8 +192,9 @@ async function renderCheckinView() {
 
     card.addEventListener('touchend', (e) => {
       clearTimeout(longPressTimer);
-      if (longPressTriggered) {
+      if (longPressTriggered || preventClick) {
         e.preventDefault();
+        e.stopPropagation();
       }
     });
 
@@ -843,7 +694,7 @@ async function openQuickMenu(itemId) {
 }
 
 function closeQuickMenu() {
-  if (Date.now() - quickMenuOpenTime < 300) return;
+  if (Date.now() - quickMenuOpenTime < 600) return;
   const overlay = document.getElementById('quick-menu-overlay');
   overlay.classList.remove('active');
   setTimeout(() => {

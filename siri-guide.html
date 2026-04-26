@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Siri教程">
-  <title>Siri 快捷指令配置教程</title>
+  <meta name="apple-mobile-web-app-title" content="日常打卡">
+  <title>Siri 快捷指令</title>
   <style>
     :root {
       --primary: #4A90D9;
@@ -51,7 +51,7 @@
       color: var(--text-secondary);
       font-size: 15px;
       margin-bottom: 28px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
     .card {
       background: var(--card-bg);
@@ -64,239 +64,24 @@
       font-size: 18px;
       font-weight: 600;
       margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
-    .card h2 .step-num {
-      background: var(--primary);
-      color: #fff;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-    .card p, .card li {
+    .card p {
       font-size: 15px;
       line-height: 1.6;
       color: var(--text-secondary);
     }
-    .card ol, .card ul { padding-left: 20px; margin: 8px 0; }
-    .card li { margin-bottom: 6px; }
-    .highlight {
-      background: rgba(74, 144, 217, 0.1);
-      color: var(--primary);
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-weight: 500;
-      font-size: 14px;
-      font-family: "SF Mono", Menlo, monospace;
-      word-break: break-all;
-    }
-    .url-example {
-      background: var(--bg);
-      border-radius: 10px;
-      padding: 14px;
-      margin: 12px 0;
-      font-family: "SF Mono", Menlo, monospace;
-      font-size: 13px;
-      word-break: break-all;
-      line-height: 1.5;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .warning {
-      background: rgba(255, 149, 0, 0.1);
-      border-left: 4px solid #FF9500;
-      padding: 14px;
-      border-radius: 0 10px 10px 0;
-      margin: 12px 0;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .tip {
-      background: rgba(52, 199, 89, 0.1);
-      border-left: 4px solid #34C759;
-      padding: 14px;
-      border-radius: 0 10px 10px 0;
-      margin: 12px 0;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .info {
-      background: rgba(74, 144, 217, 0.1);
-      border-left: 4px solid var(--primary);
-      padding: 14px;
-      border-radius: 0 10px 10px 0;
-      margin: 12px 0;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .flow-diagram {
-      background: var(--bg);
-      border-radius: 10px;
-      padding: 20px;
-      margin: 12px 0;
-      text-align: center;
-      font-size: 15px;
-      line-height: 2;
-      border: 1px solid var(--border);
-    }
-    .flow-diagram .arrow { color: var(--primary); font-weight: 700; }
-    .flow-diagram .label { color: var(--text); font-weight: 600; }
-    .flow-diagram .sub { color: var(--text-secondary); font-size: 13px; }
-    .faq-item { margin-bottom: 16px; }
-    .faq-item strong { display: block; font-size: 15px; margin-bottom: 4px; }
-    .faq-item p { font-size: 14px; }
   </style>
 </head>
 <body>
   <a href="index.html" class="back-link">‹ 返回打卡</a>
 
-  <h1>Siri 快捷指令配置教程</h1>
-  <p class="subtitle">通过 iOS 快捷指令，实现「嘿 Siri，记录洗头」一键语音打卡</p>
+  <h1>Siri 快捷指令</h1>
+  <p class="subtitle">Siri 语音打卡功能已移除</p>
 
   <div class="card">
-    <h2>💡 工作原理</h2>
-    <p>快捷指令通过剪贴板传递数据，无论在 Safari 还是 PWA 中打开，都能自动打卡：</p>
-    <div class="flow-diagram">
-      <div class="label">嘿 Siri，记录洗头</div>
-      <div class="arrow">↓</div>
-      <div class="label">快捷指令复制打卡数据到剪贴板</div>
-      <div class="arrow">↓</div>
-      <div class="label">快捷指令打开打卡应用</div>
-      <div class="arrow">↓</div>
-      <div class="label">应用自动检测剪贴板并打卡 ✓</div>
-    </div>
-    <div class="info">
-      ℹ️ <strong>两种打开方式都能处理</strong><br><br>
-      如果在 <strong>主屏幕 PWA 应用</strong>打开，直接显示 Toast 提示同步成功<br>
-      如果在 <strong>Safari</strong> 中打开，显示全屏确认页面并自动打卡
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="step-num">!</span> 前提条件</h2>
-    <ul>
-      <li>将应用部署到 <strong>HTTPS</strong> 域名（GitHub Pages / Vercel / Netlify 等免费服务）</li>
-      <li>已将应用添加到 iOS 主屏幕（Safari → 分享 → 添加到主屏幕）</li>
-      <li>iPhone 运行 iOS 14 或更高版本</li>
-    </ul>
-    <div class="warning">
-      ⚠️ 应用必须通过 HTTPS 部署才能被快捷指令调用。
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="step-num">1</span> 创建快捷指令</h2>
-    <ol>
-      <li>打开 iPhone 上的 <strong>「快捷指令」</strong> App</li>
-      <li>点击右上角 <strong>「+」</strong> 创建新快捷指令</li>
-      <li>命名为 <strong>「记录洗头」</strong></li>
-    </ol>
-  </div>
-
-  <div class="card">
-    <h2><span class="step-num">2</span> 添加「文本」动作</h2>
-    <ol>
-      <li>搜索并添加 <strong>「文本」</strong> 动作</li>
-      <li>在文本框中输入：<span class="highlight">DAILY_CHECKIN:洗头</span></li>
-    </ol>
-    <div class="tip">
-      💡 将 <span class="highlight">洗头</span> 替换为你的打卡项目名。项目名必须与打卡应用中的名称完全一致。如果项目不存在，应用会自动创建。
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="step-num">3</span> 添加「拷贝到剪贴板」动作</h2>
-    <ol>
-      <li>搜索并添加 <strong>「拷贝到剪贴板」</strong> 动作</li>
-      <li>它会自动使用上一步的文本作为输入</li>
-    </ol>
-  </div>
-
-  <div class="card">
-    <h2><span class="step-num">4</span> 添加「URL」动作</h2>
-    <ol>
-      <li>搜索并添加 <strong>「URL」</strong> 动作</li>
-      <li>在 URL 字段中输入你的打卡应用主页：</li>
-    </ol>
-    <div class="url-example">https://你的域名/</div>
-  </div>
-
-  <div class="card">
-    <h2><span class="step-num">5</span> 添加「打开 URL」动作</h2>
-    <ol>
-      <li>搜索并添加 <strong>「打开 URL」</strong> 动作</li>
-      <li>它会自动使用上一步的 URL 作为输入</li>
-    </ol>
-    <div class="url-example">
-      快捷指令完整流程：<br>
-      文本 → DAILY_CHECKIN:洗头<br>
-      ↓<br>
-      拷贝到剪贴板<br>
-      ↓<br>
-      URL → https://你的域名/<br>
-      ↓<br>
-      打开 URL
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="step-num">6</span> 配置 Siri 语音触发</h2>
-    <ol>
-      <li>点击顶部的 <strong>向下箭头 ⌄</strong></li>
-      <li>点击 <strong>「添加到 Siri」</strong></li>
-      <li>录制语音短语：<strong>「记录洗头」</strong></li>
-      <li>点击「完成」保存</li>
-    </ol>
-    <div class="tip">
-      💡 现在你可以对 iPhone 说「嘿 Siri，记录洗头」，Siri 会自动复制数据并打开应用，应用会自动完成打卡！
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="step-num">★</span> 更多打卡项的快捷指令</h2>
-    <p>为每个打卡项创建单独的快捷指令，只需要修改「文本」动作中的内容：</p>
-    <div class="url-example">
-      记录运动 → DAILY_CHECKIN:运动<br>
-      记录喝水 → DAILY_CHECKIN:喝水<br>
-      记录吃药 → DAILY_CHECKIN:吃药<br>
-      记录早睡 → DAILY_CHECKIN:早睡
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>❓ 常见问题</h2>
-    <div class="faq-item">
-      <strong>需要手动点同步吗？</strong>
-      <p>不需要。应用打开时会自动检测剪贴板，只要剪贴板中有打卡数据就会自动处理，处理完会自动清空剪贴板。</p>
-    </div>
-    <div class="faq-item">
-      <strong>Siri 说「无法完成操作」怎么办？</strong>
-      <p>请确认应用已通过 HTTPS 部署，且 URL 拼写正确。在 Safari 中手动访问该 URL 测试是否正常。</p>
-    </div>
-    <div class="faq-item">
-      <strong>打卡项目不存在会怎样？</strong>
-      <p>如果快捷指令中的项目名在应用中不存在，应用会自动创建该项目并完成打卡。</p>
-    </div>
-    <div class="faq-item">
-      <strong>重复打卡会怎样？</strong>
-      <p>同一天同一项目重复打卡时，应用会提示「今天已经打卡过了」，不会重复记录。</p>
-    </div>
-    <div class="faq-item">
-      <strong>可以离线使用快捷指令吗？</strong>
-      <p>快捷指令需要网络来打开 URL。但应用本身支持离线使用。</p>
-    </div>
-    <div class="faq-item">
-      <strong>如何修改 Siri 触发短语？</strong>
-      <p>前往「设置」→「Siri 与搜索」→ 找到对应快捷指令 → 重新录制短语。</p>
-    </div>
+    <h2>通知</h2>
+    <p>根据用户反馈，Siri 语音打卡功能已移除，以避免剪贴板读取功能的干扰。</p>
+    <p style="margin-top: 12px;">如需此功能，请手动更新快捷指令为仅打开应用主页面的简单方案。</p>
   </div>
 </body>
 </html>
