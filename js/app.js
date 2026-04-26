@@ -825,6 +825,7 @@ function detailNextMonth() {
 }
 
 let quickMenuItemId = null;
+let quickMenuOpenTime = 0;
 
 async function openQuickMenu(itemId) {
   const item = await getItemById(itemId);
@@ -833,13 +834,16 @@ async function openQuickMenu(itemId) {
   document.getElementById('quick-menu-icon').textContent = item.icon;
   document.getElementById('quick-menu-name').textContent = item.name;
   document.getElementById('quick-menu-color').style.background = item.color;
-  document.getElementById('quick-menu-overlay').style.display = 'flex';
-  setTimeout(() => {
-    document.getElementById('quick-menu-overlay').classList.add('active');
-  }, 10);
+  const overlay = document.getElementById('quick-menu-overlay');
+  overlay.style.display = 'flex';
+  quickMenuOpenTime = Date.now();
+  requestAnimationFrame(() => {
+    overlay.classList.add('active');
+  });
 }
 
 function closeQuickMenu() {
+  if (Date.now() - quickMenuOpenTime < 300) return;
   const overlay = document.getElementById('quick-menu-overlay');
   overlay.classList.remove('active');
   setTimeout(() => {
