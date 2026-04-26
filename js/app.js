@@ -330,7 +330,7 @@ async function renderCheckinView() {
       longPressTriggered = false;
       longPressTimer = setTimeout(() => {
         longPressTriggered = true;
-        handleLongPress(itemId);
+        openQuickMenu(itemId);
       }, 600);
     }, { passive: true });
 
@@ -338,7 +338,7 @@ async function renderCheckinView() {
     card.addEventListener('touchmove', () => clearTimeout(longPressTimer));
     card.addEventListener('contextmenu', (e) => {
       e.preventDefault();
-      handleLongPress(itemId);
+      openQuickMenu(itemId);
     });
   });
 }
@@ -706,4 +706,147 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+let detailItemId = null;
+let detailYear = null;
+let detailMonth = null;
+
+async function openItemDetail(itemId) {
+  const item = await getItemById(itemId);
+  if (!item) return;
+
+  detailItemId = itemId;
+  const now = new Date();
+  detailYear = now.getFullYear();
+  detailMonth = now.getMonth();
+
+  const overlay = document.getElementById('detail-overlay');
+  overlay.classList.add('active');
+
+  document.getElementById('detail-icon').textContent = item.icon;
+  document.getElementById('detail-name').textContent = item.name;
+  document.getElementById('detail-color-bar').style.background = item.color;
+
+  renderDetailContent(item);
+}
+
+function closeItemDetail() {
+  const overlay = document.getElementById('detail-overlay');
+  overlay.classList.remove('active');
+  detailItemId = null;
+}
+
+async function renderDetailContent(item) {
+  const startDate = `${detailYear}-${String(detailMonth + 1).padStart(2, '0')}-01`;
+  const endDate = `${detailYear}-${String(detailMonth + 1).padStart(2, '0')}-${String(new Date(detailYear, detailMonth + 1, 0).getDate()).padStart(2, '0')}`;
+
+  const records = await getItemRecordsByDateRange(item.id, startDate, endDate);
+  const stats = calcStats(records, detailYear, detailMonth);
+
+  const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+  document.getElementById('detail-month-label').textContent = `${detailYear}年${monthNames[detailMonth]}`;
+
+  renderHeatmap(document.getElementById('detail-heatmap'), records, detailYear, detailMonth, item.color);
+  renderStatsCards(document.getElementById('detail-stats'), stats, item.color);
+  renderWeekdayChart(document.getElementById('detail-weekday'), stats, item.color);
+  renderBarChart(document.getElementById('detail-bar'), records, detailYear, detailMonth, item.color);
+
+  const recentList = document.getElementById('detail-recent');
+  const allRecords = await getRecordsByItem(item.id);
+  allRecords.sort((a, b) => b.timestamp - a.timestamp);
+  const recent = allRecords.slice(0, 10);
+
+  if (recent.length > 0) {
+    recentList.innerHTML = `
+      <div class="detail-section-title">最近记录</div>
+      ${recent.map(r => `
+        <div class="detail-record-item">
+          <span class="detail-record-date">${r.date}</span>
+          <span class="detail-record-time">${formatTime(r.timestamp)}</span>
+        </div>
+      `).join('')}
+    `;
+  } else {
+    recentList.innerHTML = '<div class="detail-section-title">暂无记录</div>';
+  }
+}
+
+function detailPrevMonth() {
+  detailMonth--;
+  if (detailMonth < 0) {
+    detailMonth = 11;
+    detailYear--;
+  }
+  getItemById(detailItemId).then(item => {
+    if (item) renderDetailContent(item);
+  });
+}
+
+function detailNextMonth() {
+  const now = new Date();
+  detailMonth++;
+  if (detailMonth > 11) {
+    detailMonth = 0;
+    detailYear++;
+  }
+  if (detailYear > now.getFullYear() || (detailYear === now.getFullYear() && detailMonth > now.getMonth())) {
+    detailMonth = now.getMonth();
+    detailYear = now.getFullYear();
+    return;
+  }
+  getItemById(detailItemId).then(item => {
+    if (item) renderDetailContent(item);
+  });
+}
+
+let quickMenuItemId = null;
+
+async function openQuickMenu(itemId) {
+  const item = await getItemById(itemId);
+  if (!item) return;
+  quickMenuItemId = itemId;
+  document.getElementById('quick-menu-icon').textContent = item.icon;
+  document.getElementById('quick-menu-name').textContent = item.name;
+  document.getElementById('quick-menu-color').style.background = item.color;
+  document.getElementById('quick-menu-overlay').style.display = 'flex';
+  setTimeout(() => {
+    document.getElementById('quick-menu-overlay').classList.add('active');
+  }, 10);
+}
+
+function closeQuickMenu() {
+  const overlay = document.getElementById('quick-menu-overlay');
+  overlay.classList.remove('active');
+  setTimeout(() => {
+    overlay.style.display = 'none';
+  }, 200);
+}
+
+function openDetailFromQuickMenu() {
+  closeQuickMenu();
+  setTimeout(() => {
+    openItemDetail(quickMenuItemId);
+  }, 200);
+}
+
+function openEditFromQuickMenu() {
+  closeQuickMenu();
+  setTimeout(() => {
+    handleLongPress(quickMenuItemId);
+  }, 200);
+}
+
+function deleteFromQuickMenu() {
+  showConfirm('确定删除此打卡项及其所有记录？', async () => {
+    try {
+      await deleteItem(quickMenuItemId);
+      showToast('已删除');
+      closeQuickMenu();
+      renderCheckinView();
+    } catch (e) {
+      console.error('Delete item error:', e);
+      showToast('删除失败');
+    }
+  });
 }

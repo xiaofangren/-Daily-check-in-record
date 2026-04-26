@@ -280,6 +280,11 @@ async function getTodayRecords() {
   return getRecordsByDate(formatDate(new Date()));
 }
 
+async function getItemRecordsByDateRange(itemId, startDate, endDate) {
+  const records = await getRecordsByDateRange(startDate, endDate);
+  return records.filter(r => r.itemId === itemId);
+}
+
 async function deleteRecord(id) {
   return runTransaction('records', 'readwrite', (store) => {
     return store.delete(id);
