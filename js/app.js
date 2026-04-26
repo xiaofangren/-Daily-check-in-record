@@ -317,6 +317,8 @@ async function renderCheckinView() {
 
   grid.querySelectorAll('.checkin-card').forEach(card => {
     const itemId = parseInt(card.dataset.id);
+    let touchStartY = 0;
+    let touchStartX = 0;
 
     card.addEventListener('click', () => {
       if (longPressTriggered) {
@@ -326,19 +328,41 @@ async function renderCheckinView() {
       handleCheckin(itemId, card);
     });
 
-    card.addEventListener('touchstart', () => {
+    card.addEventListener('touchstart', (e) => {
       longPressTriggered = false;
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
       longPressTimer = setTimeout(() => {
         longPressTriggered = true;
+        if (navigator.vibrate) navigator.vibrate(30);
         openQuickMenu(itemId);
-      }, 600);
+      }, 500);
     }, { passive: true });
 
-    card.addEventListener('touchend', () => clearTimeout(longPressTimer));
-    card.addEventListener('touchmove', () => clearTimeout(longPressTimer));
+    card.addEventListener('touchend', (e) => {
+      clearTimeout(longPressTimer);
+      if (longPressTriggered) {
+        e.preventDefault();
+      }
+    });
+
+    card.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const dx = Math.abs(touch.clientX - touchStartX);
+        const dy = Math.abs(touch.clientY - touchStartY);
+        if (dx > 10 || dy > 10) {
+          clearTimeout(longPressTimer);
+        }
+      }
+    }, { passive: true });
+
     card.addEventListener('contextmenu', (e) => {
       e.preventDefault();
-      openQuickMenu(itemId);
+      if (!longPressTriggered) {
+        openQuickMenu(itemId);
+      }
     });
   });
 }
