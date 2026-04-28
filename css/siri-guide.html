@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="日常打卡">
+  <title>Siri 快捷指令</title>
+  <style>
+    :root {
+      --primary: #4A90D9;
+      --bg: #F2F2F7;
+      --card-bg: #FFFFFF;
+      --text: #1C1C1E;
+      --text-secondary: #8E8E93;
+      --border: #E5E5EA;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000000;
+        --card-bg: #1C1C1E;
+        --text: #FFFFFF;
+        --text-secondary: #98989D;
+        --border: #38383A;
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 32px);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 16px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 15px;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .card h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .card p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">‹ 返回打卡</a>
+
+  <h1>Siri 快捷指令</h1>
+  <p class="subtitle">Siri 语音打卡功能已移除</p>
+
+  <div class="card">
+    <h2>通知</h2>
+    <p>根据用户反馈，Siri 语音打卡功能已移除，以避免剪贴板读取功能的干扰。</p>
+    <p style="margin-top: 12px;">如需此功能，请手动更新快捷指令为仅打开应用主页面的简单方案。</p>
+  </div>
+</body>
+</html>
