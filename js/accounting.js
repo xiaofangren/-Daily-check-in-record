@@ -178,11 +178,23 @@ function handleNumpad(key) {
 }
 
 async function confirmBill() {
+  const hintEl = document.getElementById('bill-hint');
+  
   if (!acctInputAmount || parseFloat(acctInputAmount) === 0) {
+    if (hintEl) {
+      hintEl.textContent = '请输入金额';
+      hintEl.style.display = 'block';
+      setTimeout(() => { hintEl.style.display = 'none'; }, 2000);
+    }
     showToast('请输入金额');
     return;
   }
   if (!acctSelectedCategory) {
+    if (hintEl) {
+      hintEl.textContent = '请选择分类';
+      hintEl.style.display = 'block';
+      setTimeout(() => { hintEl.style.display = 'none'; }, 2000);
+    }
     showToast('请选择分类');
     return;
   }

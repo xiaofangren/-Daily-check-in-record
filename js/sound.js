@@ -1,7 +1,6 @@
 let audioCtx = null;
 let soundEnabled = true;
 let soundVolume = 0.5;
-let systemMuted = false;
 
 function initSound() {
   const savedEnabled = localStorage.getItem('soundEnabled');
@@ -14,7 +13,6 @@ function initSound() {
   }
   updateSoundToggle();
   updateVolumeSlider();
-  detectSystemMute();
   bindSoundToButtons();
 }
 
@@ -28,39 +26,9 @@ function getAudioCtx() {
   return audioCtx;
 }
 
-function detectSystemMute() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    if (ctx.state === 'suspended') {
-      systemMuted = true;
-    }
-    ctx.close();
-  } catch (e) {
-    systemMuted = true;
-  }
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      systemMuted = true;
-    } else {
-      systemMuted = false;
-      checkAudioContextState();
-    }
-  });
-}
-
-function checkAudioContextState() {
-  if (!audioCtx) return;
-  if (audioCtx.state === 'suspended') {
-    systemMuted = true;
-  } else if (audioCtx.state === 'running') {
-    systemMuted = false;
-  }
-}
-
 function shouldPlaySound() {
   if (!soundEnabled) return false;
-  if (systemMuted) return false;
+  if (document.hidden) return false;
   return true;
 }
 
@@ -156,7 +124,6 @@ function toggleSound() {
   localStorage.setItem('soundEnabled', soundEnabled.toString());
   updateSoundToggle();
   if (soundEnabled) {
-    systemMuted = false;
     playClickSound();
   }
 }
